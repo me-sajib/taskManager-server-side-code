@@ -5,7 +5,6 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 app.use(cors());
 app.use(express.json());
-// admin XQK8n01UusKRGYjT
 
 const uri =
   "mongodb+srv://admin:XQK8n01UusKRGYjT@cluster0.yl3qk.mongodb.net/?retryWrites=true&w=majority";
@@ -14,56 +13,65 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
-client.connect((err) => {
-  const collection = client.db("taskManager").collection("task");
 
-  //   add task to database
-  app.post("/task", (req, res) => {
-    const task = req.body;
-    collection.insertOne(task, (err, result) => {
-      if (err) {
-        res.status(500).send(err);
-      } else {
-        res.send(result);
-      }
-    });
-  });
+async function run() {
+  try {
+    await client.connect();
+    const db = client.db("taskManager").collection("task");
+    const completeTaskDb = client.db("taskManager").collection("completeTask");
 
-  //   get all tasks from database
-  app.get("/task", (req, res) => {
-    collection.find({}).toArray((err, result) => {
-      if (err) {
-        res.status(500).send(err);
-      } else {
-        res.send(result);
-      }
-    });
-  });
-});
-
-// get task by id
-app.get("/task/:id", (req, res) => {
-  const id = req.params.id;
-  collection.findOne({ _id: ObjectId(id) }, (err, result) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
+    // add task to database
+    app.post("/task", async (req, res) => {
+      const task = req.body;
+      const result = await db.insertOne(task);
       res.send(result);
-    }
-  });
-});
+    });
 
-//  delete task from database
-app.delete("/task/:id", (req, res) => {
-  const id = req.params.id;
-  collection.deleteOne({ _id: ObjectId(id) }, (err, result) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
+    // get all task     from database
+    app.get("/task", async (req, res) => {
+      const tasks = await db.find({}).toArray();
+      res.send(tasks);
+    });
+
+    // get by id from database
+    app.get("/task/:id", async (req, res) => {
+      const id = req.params.id;
+      const task = await db.findOne({ _id: ObjectId(id) });
+
+      res.send(task);
+    });
+
+    // update task in database
+    app.put("/task/:id", async (req, res) => {
+      const id = req.params.id;
+      const task = req.body;
+      const result = await db.updateOne({ _id: ObjectId(id) }, { $set: task });
       res.send(result);
-    }
-  });
-});
+    });
+
+    // delete task from database
+    app.delete("/task/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await db.deleteOne({ _id: ObjectId(id) });
+      res.send(result);
+    });
+
+    // complete task post
+    app.post("/completeTask", async (req, res) => {
+      const task = req.body;
+      const result = await completeTaskDb.insertOne(task);
+      res.send(result);
+    });
+
+    // complete task get
+    app.get("/completeTask", async (req, res) => {
+      const tasks = await completeTaskDb.find({}).toArray();
+      res.send(tasks);
+    });
+  } finally {
+  }
+}
+run().catch((err) => console.error(err));
 
 app.get("/", (req, res) => {
   res.send("Hello World");
