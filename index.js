@@ -16,7 +16,18 @@ const client = new MongoClient(uri, {
 });
 client.connect((err) => {
   const collection = client.db("taskManager").collection("task");
-  console.log("Connected successfully to server");
+
+  //   add task to database
+  app.post("/task", (req, res) => {
+    const task = req.body;
+    collection.insertOne(task, (err, result) => {
+      if (err) {
+        res.status(500).send(err);
+      } else {
+        res.send(result);
+      }
+    });
+  });
 });
 
 app.get("/", (req, res) => {
