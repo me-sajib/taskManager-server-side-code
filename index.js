@@ -41,6 +41,18 @@ client.connect((err) => {
   });
 });
 
+//  delete task from database
+app.delete("/task/:id", (req, res) => {
+  const id = req.params.id;
+  collection.deleteOne({ _id: ObjectId(id) }, (err, result) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.send(result);
+    }
+  });
+});
+
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
