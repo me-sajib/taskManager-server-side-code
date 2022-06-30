@@ -28,6 +28,17 @@ client.connect((err) => {
       }
     });
   });
+
+  //   get all tasks from database
+  app.get("/task", (req, res) => {
+    collection.find({}).toArray((err, result) => {
+      if (err) {
+        res.status(500).send(err);
+      } else {
+        res.send(result);
+      }
+    });
+  });
 });
 
 app.get("/", (req, res) => {
