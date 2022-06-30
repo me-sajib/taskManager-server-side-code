@@ -13,7 +13,7 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
-
+const port = process.env.PORT || 5000;
 async function run() {
   try {
     await client.connect();
@@ -71,12 +71,12 @@ async function run() {
   } finally {
   }
 }
-run().catch((err) => console.error(err));
+run().catch((err) => console.log(err));
 
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-app.listen("5000", () => {
+app.listen(port, () => {
   console.log("Server is running on port 5000");
 });
