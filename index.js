@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const app = express();
 app.use(cors());
@@ -38,6 +38,18 @@ client.connect((err) => {
         res.send(result);
       }
     });
+  });
+});
+
+// get task by id
+app.get("/task/:id", (req, res) => {
+  const id = req.params.id;
+  collection.findOne({ _id: ObjectId(id) }, (err, result) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.send(result);
+    }
   });
 });
 
